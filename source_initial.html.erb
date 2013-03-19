@@ -1,0 +1,51 @@
+<div class="comment-content">
+  <% if comment.body.include?('[/quote]') %>
+    <% @text = Array.new %>
+    <% summ = '' %>
+    <% @text = simple_format(comment.body).split(' ') %>
+    <% namecheck = false %>
+    <% contentcheck = false %>
+    <% quotestart = false %>
+    <% donothing = true %>
+    <% quotecount = 0 %>
+    <% count_quotes = 0 %>
+    <% @text.each do |t| %>
+      <% if t.include?('[/quote]') %>
+        <% count_quotes ||= 0 %>
+        <% count_quotes += 1 %>
+      <% end %>
+    <% end %>
+    <% @text.each do |t| %>
+      <% if t.include?('[/quote]') %>
+        <% contentcheck = false %>
+        <% namecheck = false %>
+        <% t = t.gsub('[/quote]', '</div></div>') %>
+      <% elsif t.include?('[quote=') %>
+        <% namecheck = true %>
+        <% donothing = false %>
+        <% t = t.gsub('[quote=', '') %>
+      <% elsif t.include?(']') %>
+        <% t = t.gsub(']', '') %>
+      <% end %>
+      <% if donothing == false %>
+        <% if contentcheck == true and namecheck == true and t != '' and t != '<p>' and t != '</p>' %>
+          <% t = '<div class=quotecontent>' + '<div class=quotestart>' + '<div class=quotename>' + 'Цитата - ' + t + '</div>' %>
+          <% contentcheck = true %>
+          <% namecheck = false %>
+        <% elsif contentcheck == true and t != '' and t != '<p>' and t != '</p>' %>
+          <% t = '<div class=quotecontent>' + t %>
+          <% contentcheck = false %>
+        <% elsif namecheck == true and t != '' and t != '<p>' and t != '</p>' %>
+          <% t = '<div class=quotestart>' + '<div class=quotename>' + 'Цитата - ' + t + '</div>' %>
+          <% namecheck = false %>
+          <% contentcheck = true %>
+        <% end %>
+      <% end %>
+      <% summ = summ + t + ' ' %>
+    <% end %>
+  <% else %>
+    <% summ = comment.body %>
+  <% end %>
+  <%=raw simple_format(summ) %>
+</div>
+
